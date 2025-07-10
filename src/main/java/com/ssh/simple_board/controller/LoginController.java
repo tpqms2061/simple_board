@@ -6,6 +6,7 @@ import com.ssh.simple_board.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,7 +20,7 @@ public class LoginController {
     private final UserRepository userRepository;
 
 
-    @GetMapping({"/" , "/login"})
+    @GetMapping({"/", "/login"})
     public String loginForm(Model model) {
         model.addAttribute("loginDto", new LoginDto());
 
@@ -33,12 +34,12 @@ public class LoginController {
             HttpSession httpSession, //로그인 성공시 HttpSession 을 달아줘야됨
             Model model
     ) {
-        if(bindingResult.hasErrors()) return "login";
+        if (bindingResult.hasErrors()) return "login";
 
         User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
 
         if (user == null || !user.getPassword().equals(loginDto.getPassword())) {
-            model.addAttribute("error" , "아이디 /비밀번호가 올바르지 않습니다.");
+            model.addAttribute("error", "아이디 /비밀번호가 올바르지 않습니다.");
 
 //            optional이기때문에 null일수도 있고 로그인 비밀번호가 DTO 비밀번호와 올바르지 않을떄 에러발생
             return "login";
@@ -48,4 +49,10 @@ public class LoginController {
         return "redirect:/posts";
     }
 
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+
+        return "redirect:/login";
+    }
 }

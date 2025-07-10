@@ -26,7 +26,7 @@ public class Comment {
     private String text;
 
     @Column(nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
 
     //유저한명이 댓글을 다는것이기 때문에

@@ -1,22 +1,19 @@
 package com.ssh.simple_board.controller;
 
+import com.ssh.simple_board.dto.CommentDto;
 import com.ssh.simple_board.dto.PostDto;
+import com.ssh.simple_board.model.Comment;
 import com.ssh.simple_board.model.Post;
 import com.ssh.simple_board.model.User;
 import com.ssh.simple_board.repository.CommentRepository;
 import com.ssh.simple_board.repository.PostRepository;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -65,5 +62,47 @@ public class PostsController {
 
         postRepository.save(post);
         return "redirect:/posts";
+    }
+
+    @GetMapping("/{id}")
+    public String detail(
+            @PathVariable Integer id,
+            Model model,
+            HttpSession httpSession
+    ) {
+        Post post = postRepository.findById(id).orElseThrow();
+        //findAllById()는 jpaRepo 에서 기본적으로 제공
+        model.addAttribute("post", post);
+        model.addAttribute("commentDto", new CommentDto());
+
+        return "post-detail";
+
+    }
+
+    //댓글 달기
+    @PostMapping("/{postId}/comments")
+    public String addComment(
+            @PathVariable Integer postId, //comment Id인지 Post id인지 구별하기위해 명칭을 postid
+            @Valid @ModelAttribute CommentDto commentDto,
+            BindingResult bindingResult,
+            HttpSession httpSession,
+            Model model
+    ) {
+        Post post = postRepository.findById(postId).orElseThrow();
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("post ", post);
+            return "post-detail";
+        }
+        User user = currentUser(httpSession); //세션에서 유저정보 꺼내옴
+        Comment comment = Comment.builder()
+                .post(post)
+                .author(user)
+                .text(commentDto.getText())
+                .createdAt(LocalDateTime.now())
+                .build();
+        commentRepository.save(comment);
+
+        return "redirect:/posts/" + postId;
     }
 }

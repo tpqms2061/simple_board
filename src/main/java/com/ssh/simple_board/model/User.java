@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name="users") //테이블 \dt 생성
 public class User {
 
-    @Id
+    @Id //기본키
     @GeneratedValue(strategy = GenerationType.IDENTITY) //AUTO_INCREMENT 기능: 숫자형 컬럼의 값을 자동으로 증가시키는 기능
     // 엔티티의 기본 키(@Id) 값을 자동 생성하도록 설정할 때 사용하는 어노테이션
     private Integer id;  //primary key 이면서도  다른 데이터베이스에서 참조할수있는 외래키 역할
